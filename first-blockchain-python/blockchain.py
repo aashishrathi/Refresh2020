@@ -61,10 +61,35 @@ class Blockchain(object):
 
     @staticmethod
     def hash(block):
-        #Returns the hash of a block
-        pass
+        #Returns the SHA256 hash of a block
+        block_string = json.dumps(block, sort_keys=True).encode()
+        return hashlib.sha256(block_string).hexdigest()
 
     @property #makes it an attribute with a getter and setter
     def last_block(self):
         #Returns the last block in a chain
-        pass
+        return self.chain[-1]
+
+    def proof_of_work(self, last_proof):
+        """
+        Find number p which when hashed with the previous proof generates a number with 4 leading 0s
+        :param last_proof: <int>
+        :return: <int> next_proof
+        """
+        proof = 0
+        while self.valid_proof(last_proof, proof) is False:
+            proof += 1
+
+        return proof
+
+    @staticmethod
+    def valid_proof(last_proof, proof):
+        """
+        Check if hash(pp') contains 4 leading 0s
+        :param last_proof: <int> p'
+        :param proof: <int> p
+        :return: <bool>
+        """
+        test_string = f'{last_proof}{proof}'.encode()
+        test_hash = hashlib.sha256(test_string).hexdigest()
+        return guess_hash[:4] == "0000"
